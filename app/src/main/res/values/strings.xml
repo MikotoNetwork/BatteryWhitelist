@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="xposed_description">阻止 ColorOS恢复电池优化</string>
-    <string name="description">给陈希锤锤背</string>
-    <string sw="">回滚版本 放弃services</string>
+    <string name="xposed_description">Prevent ColorOS from restoring battery optimization.</string>
+    <string name="description">Give Chen Xi a back massage</string>
+    <string name="app_name">BatteryWhitelist</string>
     </resources>
