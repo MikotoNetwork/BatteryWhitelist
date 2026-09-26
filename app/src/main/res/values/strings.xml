@@ -2,4 +2,5 @@
 <resources>
     <string name="xposed_description">阻止 ColorOS恢复电池优化</string>
     <string name="description">给陈希锤锤背</string>
+    <string sw="">回滚版本 放弃services</string>
     </resources>
