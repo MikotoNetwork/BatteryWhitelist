@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="xposed_description">阻止 ColorOS恢复电池优化</string>
-    <string name="description">给陈希锤锤背</string>
-    <string name="app_name">电池白名单守卫者</string>
-    </resources>
