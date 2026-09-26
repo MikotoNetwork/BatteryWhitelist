@@ -1,0 +1,51 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.batterywhitelist'
+    compileSdk 36
+
+    // 🔑 固定签名配置（注意：必须在 android {} 大括号内部！）
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE_PATH") ?: "release.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.batterywhitelist"
+        minSdk 29
+        targetSdk 36
+        versionCode 2
+        versionName "1.1"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+            // 🔑 强制 Release 包使用我们的签名
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+
+    packaging {
+        resources {
+            excludes += ['META-INF/MANIFEST.MF']
+        }
+    }
+}
+
+dependencies {
+    compileOnly 'io.github.libxposed:api:102.0.0@aar'
+}
