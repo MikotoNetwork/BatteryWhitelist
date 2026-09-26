@@ -1,9 +1,14 @@
-name: Build BatteryWhitelist APK
+name: Release Build
 
 on:
   push:
-    branches: [ main, master ]
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+# 🎯 必须有写权限，才能自动创建 Release
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -24,7 +29,7 @@ jobs:
         with:
           gradle-version: '9.6.0'
 
-      # 🔑 关键步骤：把 Base64 还原成 keystore 文件
+      # 🔑 解码固定签名 keystore
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.jks
@@ -38,9 +43,22 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle clean assembleRelease --no-daemon --stacktrace
 
-      - name: Upload APK
+      # 自动创建 GitHub Release，并附上 APK
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/*.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 🔒 保留一份 artifact，方便排查
+      - name: Upload Release APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BatteryWhitelist-release
+          name: BatteryWhitelist-release-${{ github.ref_name }}
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
+          retention-days: 30
