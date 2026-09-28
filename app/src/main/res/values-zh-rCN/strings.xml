@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="xposed_description">阻止 ColorOS恢复电池优化</string>
+    <string name="description">给陈希锤锤背</string>
+    <string name="EditText_hint">搜索应用名或包名...</string>
+    <string name="title">勾选要保护的应用（防止被 ColorOS 冻结）</string>
+    <string name="app_name">电池白名单守护者</string>
+    </resources>

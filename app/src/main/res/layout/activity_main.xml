@@ -3,16 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="#FFFFFF">
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/titleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:text="勾选要保护的应用（防止被 ColorOS 冻结）"
+        android:text="@string/title"
         android:textSize="16sp"
-        android:textColor="#000000"
+        android:textColor="@color/black"
         android:padding="16dp" />
 
     <EditText
@@ -22,10 +22,10 @@
         android:layout_below="@id/titleText"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:hint="搜索应用名或包名..."
-        android:textColor="#000000"
-        android:textColorHint="#888888"
-        android:backgroundTint="#000000" />
+        android:hint="@string/EditText_hint"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:backgroundTint="" />
 
     <ListView
         android:id="@+id/appList"
