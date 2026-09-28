@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.batterywhitelist'
-    compileSdk 37
+    compileSdk 36
 
     // 🔑 固定签名配置（注意：必须在 android {} 大括号内部！）
     signingConfigs {
@@ -19,7 +19,7 @@ android {
     defaultConfig {
         applicationId "com.batterywhitelist"
         minSdk 29
-        targetSdk 37
+        targetSdk 36
         versionCode 12
         versionName "1.12"
     }
