@@ -20,6 +20,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+      - name: Clean Gradle Cache
+          run: rm -rf ~/.gradle/caches      
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4

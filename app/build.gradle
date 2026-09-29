@@ -45,10 +45,7 @@ android {
             signingConfig signingConfigs.release
         }
         
-        debug {
-         minifyEnabled true
-         shrinkResources true 
-        }
+        
     }
 
     compileOptions {
