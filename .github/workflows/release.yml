@@ -6,7 +6,6 @@ on:
       - 'v*'
   workflow_dispatch:
 
-# 🎯 必须有写权限，才能自动创建 Release
 permissions:
   contents: write
 
@@ -23,21 +22,23 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          
+
+      
       - name: Clean Gradle Cache
         run: rm -rf ~/.gradle/caches
-        
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.6.0'
 
-      # 🔑 解码固定签名 keystore
+      
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.jks
           ls -lh release.jks
 
+      
       - name: Build Release APK
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/release.jks
@@ -46,7 +47,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle clean assembleRelease --no-daemon --stacktrace
 
-      # 自动创建 GitHub Release，并附上 APK
+      
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -57,7 +58,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 🔒 保留一份 artifact，方便排查
+      
       - name: Upload Release APK as Artifact
         uses: actions/upload-artifact@v4
         with:
