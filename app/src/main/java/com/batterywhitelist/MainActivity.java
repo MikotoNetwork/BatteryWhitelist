@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
@@ -22,19 +24,37 @@ import java.util.Set;
 
 public class MainActivity extends Activity {
 
+    //  缓存应用信息的内部类，避免反复调用 loadLabel() 导致卡顿
+    static class AppItem {
+        String name;
+        String lowerName;
+        String pkg;
+        AppItem(String name, String pkg) {
+            this.name = name;
+            this.pkg = pkg;
+            this.lowerName = name.toLowerCase();
+        }
+    }
+
     private SharedPreferences prefs;
     private ListView listView;
     private EditText searchBar;
     private ArrayAdapter<String> adapter;
-    private final List<ApplicationInfo> allApps = new ArrayList<>();
+    private final List<AppItem> cachedApps = new ArrayList<>();
     private final List<String> displayList = new ArrayList<>();
+
+    //  搜索防抖 Handler
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        
         prefs = getSharedPreferences("battery_whitelist_prefs", MODE_PRIVATE);
+
         listView = findViewById(R.id.appList);
         searchBar = findViewById(R.id.searchBar);
 
@@ -42,20 +62,24 @@ public class MainActivity extends Activity {
         listView.setAdapter(adapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        PackageManager pm = getPackageManager();
-        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        for (ApplicationInfo info : packages) {
-            if (!info.packageName.equals(getPackageName()) && !info.packageName.equals("android")) {
-                allApps.add(info);
-            }
-        }
+        
+        loadAppsToCache();
 
+        
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { filter(s.toString()); }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+                String q = s.toString();
+                searchRunnable = () -> filter(q);
+                searchHandler.postDelayed(searchRunnable, 300);
+            }
             @Override public void afterTextChanged(Editable s) {}
         });
 
+       
         listView.setOnItemClickListener((parent, view, position, id) -> {
             String selectedPkg = displayList.get(position).split("\n")[1];
             CheckedTextView textView = (CheckedTextView) view;
@@ -68,23 +92,52 @@ public class MainActivity extends Activity {
             Toast.makeText(MainActivity.this, "已保存，重启手机后生效", Toast.LENGTH_SHORT).show();
         });
 
+        
         filter("");
 
-        // 🚀 每次打开 App 时，自动向 root 目录部署守护脚本
+        
         deployGuardScript();
     }
 
+    /**
+     * 预加载应用列表到内存，避免搜索时卡顿
+     */
+    private void loadAppsToCache() {
+        PackageManager pm = getPackageManager();
+        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        cachedApps.clear();
+        for (ApplicationInfo info : packages) {
+            // 过滤掉自己和系统框架
+            if (!info.packageName.equals(getPackageName()) && !info.packageName.equals("android")) {
+                String name = info.loadLabel(pm).toString();
+                cachedApps.add(new AppItem(name, info.packageName));
+            }
+        }
+    }
+
+    /**
+     * 极速搜索过滤，只遍历内存缓存
+     */
     private void filter(String query) {
         displayList.clear();
         String q = query.toLowerCase();
-        for (ApplicationInfo info : allApps) {
-            String name = info.loadLabel(getPackageManager()).toString();
-            if (name.toLowerCase().contains(q) || info.packageName.toLowerCase().contains(q)) {
-                displayList.add(name + "\n" + info.packageName);
+
+        if (q.isEmpty()) {
+            for (AppItem item : cachedApps) {
+                displayList.add(item.name + "\n" + item.pkg);
+            }
+        } else {
+            for (AppItem item : cachedApps) {
+                // 使用缓存的 lowerName 和 pkg 进行搜索，速度极快
+                if (item.lowerName.contains(q) || item.pkg.toLowerCase().contains(q)) {
+                    displayList.add(item.name + "\n" + item.pkg);
+                }
             }
         }
+
         adapter.notifyDataSetChanged();
 
+        // 恢复勾选状态
         Set<String> saved = prefs.getStringSet("protected_packages", Collections.emptySet());
         for (int i = 0; i < displayList.size(); i++) {
             String pkg = displayList.get(i).split("\n")[1];
@@ -93,26 +146,19 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * 🚀 通过 root 权限把守护脚本部署到 /data/adb/service.d/
+     * 通过 root 权限把守护脚本部署到 /data/adb/service.d/
      */
     private void deployGuardScript() {
         new Thread(() -> {
             try {
-                // 读取用户勾选的最新保护名单
                 Set<String> saved = prefs.getStringSet("protected_packages", Collections.emptySet());
-                StringBuilder pkgList = new StringBuilder();
-                for (String p : saved) pkgList.append(p).append(" ");
-                if (pkgList.length() == 0) {
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this,
-                            "尚未勾选任何应用，跳过守护脚本部署", Toast.LENGTH_SHORT).show());
-                    return;
-                }
+                if (saved.isEmpty()) return;
 
-                String guardCmd = "";
+                StringBuilder guardCmd = new StringBuilder();
                 for (String p : saved) {
-                    guardCmd += "  cmd deviceidle whitelist +" + p + "\n" +
-                                "  appops set " + p + " RUN_IN_BACKGROUND allow\n" +
-                                "  appops set " + p + " RUN_ANY_IN_BACKGROUND allow\n";
+                    guardCmd.append("  cmd deviceidle whitelist +").append(p).append("\n")
+                            .append("  appops set ").append(p).append(" RUN_IN_BACKGROUND allow\n")
+                            .append("  appops set ").append(p).append(" RUN_ANY_IN_BACKGROUND allow\n");
                 }
 
                 String script = "#!/system/bin/sh\n" +
@@ -134,12 +180,9 @@ public class MainActivity extends Activity {
                 os.flush();
                 process.waitFor();
 
-                runOnUiThread(() -> Toast.makeText(MainActivity.this,
-                        "守护脚本已部署", Toast.LENGTH_SHORT).show());
-
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "守护脚本已部署", Toast.LENGTH_SHORT).show());
             } catch (Throwable t) {
-                runOnUiThread(() -> Toast.makeText(MainActivity.this,
-                        "部署脚本失败: " + t.getMessage(), Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "部署脚本失败: " + t.getMessage(), Toast.LENGTH_LONG).show());
             }
         }).start();
     }
