@@ -24,7 +24,7 @@
         android:layout_marginRight="16dp"
         android:hint="@string/EditText_hint"
         android:textColor="@color/black"
-        android:textColorHint="@string/EditText_hint"
+        android:textColorHint="@color/red"
         android:backgroundTint="#FFFFFFFF" />
 
     <ListView
