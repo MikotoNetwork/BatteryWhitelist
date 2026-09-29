@@ -51,7 +51,13 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        
+        //  强行引用，逼迫编译器把 BatteryWhitelistModule 编译进 DEX
+        try {
+            Class.forName("com.batterywhitelist.BatteryWhitelistModule");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         
         prefs = getSharedPreferences("battery_whitelist_prefs", MODE_PRIVATE);
 
