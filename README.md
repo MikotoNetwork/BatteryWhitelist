@@ -1,5 +1,6 @@
 # BatteryWhitelist (电池白名单守卫者)
 ![BatteryWhitelist](assets/ic_launcher.png)
+[![CI](https://github.com/MikotoNetwork/BatteryWhitelist/actions/workflows/release.yml/badge.svg)](https://github.com/MikotoNetwork/BatteryWhitelist/actions/workflows/release.yml)<br>
 > **“买的设备是自己的，自己拥有对该设备的一切权利，厂商无权干涉。”**
 > 
 > 一个诞生于对抗流氓系统“爹味”管理的硬核 LSPosed 模块。
@@ -45,7 +46,7 @@
 *   已正确安装并激活 **Zygisk Next** 与 **LSPosed** (API 102)
 
 ### 安装步骤
-1. 前往 [Actions](https://github.com/MikotoNetwork/BatteryWhitelist/actions) 下载最新构建的 `BatteryWhitelist-release.apk`。
+1. 前往 [Releases](https://github.com/MikotoNetwork/BatteryWhitelist/releases/latest) 下载最新构建的 `app-release.apk`。
 2. 在手机上安装该 APK。
 3. 打开 Root 管理器（KernelSU / Magisk），在应用列表中找到 `BatteryWhitelist`，**开启超级用户权限开关**（只需点一次，后续静默授权）。
 4. 打开 BatteryWhitelist App，在列表中搜索并勾选你需要保护的应用（例如：小米运动健康）。
