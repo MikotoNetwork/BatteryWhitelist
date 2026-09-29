@@ -6,13 +6,24 @@ android {
     namespace 'com.batterywhitelist'
     compileSdk 37
 
-    // 🔑 固定签名配置（注意：必须在 android {} 大括号内部！）
+    
     signingConfigs {
         release {
             storeFile file(System.getenv("KEYSTORE_PATH") ?: "release.jks")
             storePassword System.getenv("KEYSTORE_PASSWORD")
             keyAlias System.getenv("KEY_ALIAS")
             keyPassword System.getenv("KEY_PASSWORD")
+            enableV1Signing false
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing true
+        }
+        debug{
+        enableV1Signing false
+        enableV2Signing true
+        enableV3Signing true
+        enableV4Signing true
+        
         }
     }
 
@@ -20,17 +31,23 @@ android {
         applicationId "com.batterywhitelist"
         minSdk 29
         targetSdk 37
-        versionCode 14
-        versionName "1.14"
+        versionCode 15
+        versionName "1.15"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true 
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
-            // 🔑 强制 Release 包使用我们的签名
+           
             signingConfig signingConfigs.release
+        }
+        
+        debug {
+         minifyEnabled true
+         shrinkResources true 
         }
     }
 
@@ -47,5 +64,12 @@ android {
 }
 
 dependencies {
-    compileOnly 'io.github.libxposed:api:102.0.0@aar'
-}
+    
+    compileOnly('io.github.libxposed:api:102.0.0@aar') {
+        exclude group: 'org.jetbrains.kotlin'
+        exclude group: 'org.jetbrains'
+        exclude module: 'kotlin-stdlib'
+        exclude module: 'kotlin-stdlib-jdk8'
+        exclude module: 'kotlin-stdlib-jdk7'
+    }
+}   
