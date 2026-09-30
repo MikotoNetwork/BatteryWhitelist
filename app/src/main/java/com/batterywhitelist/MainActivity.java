@@ -22,13 +22,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 模块的用户界面（UI）与应用选择中心。
+ *
+ * <p>主要职责：</p>
+ * <ol>
+ *   <li>展示所有已安装应用的列表（带搜索和防抖功能）。</li>
+ *   <li>允许用户勾选需要保护的应用，并将列表写入 SharedPreferences。</li>
+ *   <li>在用户打开 App 时，利用 Root 权限自动向 {@code /data/adb/service.d/} 部署守护脚本（三位一体防御的第三层）。</li>
+ * </ol>
+ *
+ * @author MikotoNetwork
+ * @version 1.18
+ */
 public class MainActivity extends Activity {
 
-    //  缓存应用信息的内部类，避免反复调用 loadLabel() 导致卡顿
+    /**
+     * 缓存应用信息的内部类，避免反复调用 loadLabel() 导致搜索卡顿。
+     */
     static class AppItem {
-        String name;
-        String lowerName;
-        String pkg;
+        String name;        // 应用显示名称
+        String lowerName;   // 小写名称，用于搜索加速
+        String pkg;         // 应用包名
+
         AppItem(String name, String pkg) {
             this.name = name;
             this.pkg = pkg;
@@ -40,10 +56,13 @@ public class MainActivity extends Activity {
     private ListView listView;
     private EditText searchBar;
     private ArrayAdapter<String> adapter;
+    
+    /** 内存缓存的应用列表，避免每次打字都调用系统接口 */
     private final List<AppItem> cachedApps = new ArrayList<>();
+    /** 当前列表中展示的内容（包含应用名和包名） */
     private final List<String> displayList = new ArrayList<>();
 
-    //  搜索防抖 Handler
+    /** 搜索防抖 Handler，防止输入时 UI 卡顿 */
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
 
@@ -51,16 +70,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
-        //  强行引用，逼迫编译器把 BatteryWhitelistModule 编译进 DEX
-        try {
-            Class.forName("com.batterywhitelist.BatteryWhitelistModule");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        
-        prefs = getSharedPreferences("battery_whitelist_prefs", MODE_PRIVATE);
 
+        // 本地兜底 SharedPreferences
+        prefs = getSharedPreferences("battery_whitelist_prefs", MODE_PRIVATE);
         listView = findViewById(R.id.appList);
         searchBar = findViewById(R.id.searchBar);
 
@@ -68,10 +80,10 @@ public class MainActivity extends Activity {
         listView.setAdapter(adapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        
+        // 1. 预缓存所有应用的名字和包名（解决搜索卡顿的核心优化）
         loadAppsToCache();
 
-        
+        // 2. 搜索框加入 300ms 防抖逻辑（用户停止输入后才开始搜索）
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -85,7 +97,7 @@ public class MainActivity extends Activity {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-       
+        // 3. 列表点击监听：勾选/取消应用，并实时保存
         listView.setOnItemClickListener((parent, view, position, id) -> {
             String selectedPkg = displayList.get(position).split("\n")[1];
             CheckedTextView textView = (CheckedTextView) view;
@@ -98,15 +110,16 @@ public class MainActivity extends Activity {
             Toast.makeText(MainActivity.this, "已保存，重启手机后生效", Toast.LENGTH_SHORT).show();
         });
 
-        
+        // 4. 初始化搜索
         filter("");
 
-        
+        // 5. 每次打开 App 时，自动向 root 目录部署守护脚本
         deployGuardScript();
     }
 
     /**
-     * 预加载应用列表到内存，避免搜索时卡顿
+     * 预加载应用列表到内存，避免搜索时频繁调用系统的 loadLabel() 导致卡顿。
+     * <p>这是针对列表搜索优化的关键步骤。</p>
      */
     private void loadAppsToCache() {
         PackageManager pm = getPackageManager();
@@ -122,7 +135,9 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * 极速搜索过滤，只遍历内存缓存
+     * 极速搜索过滤，只遍历内存中的缓存。
+     *
+     * @param query 用户输入的搜索关键词
      */
     private void filter(String query) {
         displayList.clear();
@@ -152,7 +167,10 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * 通过 root 权限把守护脚本部署到 /data/adb/service.d/
+     * 通过 Root 权限把守护脚本部署到 {@code /data/adb/service.d/}。
+     *
+     * <p>脚本会在每次开机后启动一个无限循环，每 60 秒强制拉一次白名单，
+     * 彻底把被系统“杀死”的可能掐断。这是三位一体防御网中的第三层（Root脚本层）。</p>
      */
     private void deployGuardScript() {
         new Thread(() -> {
@@ -177,6 +195,7 @@ public class MainActivity extends Activity {
 
                 String scriptPath = "/data/adb/service.d/battery_guard.sh";
 
+                // 使用 root 权限写入脚本
                 Process process = Runtime.getRuntime().exec("su");
                 DataOutputStream os = new DataOutputStream(process.getOutputStream());
                 os.writeBytes("mkdir -p /data/adb/service.d\n");

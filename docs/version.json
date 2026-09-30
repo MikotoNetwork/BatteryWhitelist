@@ -1,0 +1,6 @@
+{
+  "version": "1.18",
+  "release_date": "2026-09-30",
+  "download_url": "https://github.com/MikotoNetwork/BatteryWhitelist/releases/latest",
+  "changelog": "1. 新增 OplusDeviceIdleHelper 拦截逻辑\n2. 修复部分机型搜索框卡顿问题\n3. 体积极限压缩至 91KB"
+}
