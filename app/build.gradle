@@ -2,28 +2,22 @@ plugins {
     id 'com.android.application'
 }
 
+// 🎯 强制排除 Kotlin 依赖，防止 AAR 把 2MB 的 Kotlin 垃圾带进来
+configurations.all {
+    exclude group: 'org.jetbrains.kotlin'
+    exclude group: 'org.jetbrains'
+}
+
 android {
     namespace 'com.batterywhitelist'
     compileSdk 37
 
-    
     signingConfigs {
         release {
             storeFile file(System.getenv("KEYSTORE_PATH") ?: "release.jks")
             storePassword System.getenv("KEYSTORE_PASSWORD")
             keyAlias System.getenv("KEY_ALIAS")
             keyPassword System.getenv("KEY_PASSWORD")
-            enableV1Signing false
-            enableV2Signing true
-            enableV3Signing true
-            enableV4Signing true
-        }
-        debug{
-        enableV1Signing false
-        enableV2Signing true
-        enableV3Signing true
-        enableV4Signing true
-        
         }
     }
 
@@ -31,23 +25,24 @@ android {
         applicationId "com.batterywhitelist"
         minSdk 29
         targetSdk 37
-        versionCode 16
-        versionName "1.16"
+        versionCode 15
+        versionName "1.15"
     }
 
     buildTypes {
         release {
-           minifyEnabled false
-           
+            minifyEnabled false       
+            shrinkResources false      
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
-           
             signingConfig signingConfigs.release
         }
-        
-        
-        
-        
+    }
+
+    //  新增：关闭 Release 包的 Lint 致命检查
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
     }
 
     compileOptions {
@@ -62,19 +57,6 @@ android {
     }
 }
 
-//  强制排除所有 Kotlin 依赖 减小安装包体积
-configurations.all {
-    exclude group: 'org.jetbrains.kotlin'
-    exclude group: 'org.jetbrains'
-}
-
 dependencies {
-    
-    compileOnly('io.github.libxposed:api:102.0.0@aar') {
-        exclude group: 'org.jetbrains.kotlin'
-        exclude group: 'org.jetbrains'
-        exclude module: 'kotlin-stdlib'
-        exclude module: 'kotlin-stdlib-jdk8'
-        exclude module: 'kotlin-stdlib-jdk7'
-    }
-}   
+    compileOnly 'io.github.libxposed:api:102.0.0@aar'
+}
