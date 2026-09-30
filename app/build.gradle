@@ -18,7 +18,20 @@ android {
             storePassword System.getenv("KEYSTORE_PASSWORD")
             keyAlias System.getenv("KEY_ALIAS")
             keyPassword System.getenv("KEY_PASSWORD")
+              signingConfig signingConfigs.release
+            enableV1Signing false
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing true
             
+        }
+        
+        debug {
+        enableV1Signing false
+        enableV2Signing true
+        enableV3Signing true
+        enableV4Signing true
+        
         }
     }
 
@@ -37,20 +50,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
             signingConfig signingConfigs.release
-            enableV1Signing false
-            enableV2Signing true
-            enableV3Signing true
-            enableV4Signing true
-        }
-        debug {
-        enableV1Signing false
-        enableV2Signing true
-        enableV3Signing true
-        enableV4Signing true
         }
     }
 
-    //  新增：关闭 Release 包的 Lint 致命检查
+    // 🎯 新增：关闭 Release 包的 Lint 致命检查
     lint {
         checkReleaseBuilds false
         abortOnError false
