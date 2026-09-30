@@ -37,17 +37,14 @@ android {
 
     buildTypes {
         release {
-           minifyEnabled true
-             shrinkResources true 
+           minifyEnabled false
+      //       shrinkResources true 
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
            
             signingConfig signingConfigs.release
         }
-        debug{
-        minifyEnabled true
-        shrinkResources true 
-        }
+        
         
         
         
@@ -63,6 +60,12 @@ android {
             excludes += ['META-INF/MANIFEST.MF']
         }
     }
+}
+
+//  强制排除所有 Kotlin 依赖 减小安装包体积
+configurations.all {
+    exclude group: 'org.jetbrains.kotlin'
+    exclude group: 'org.jetbrains'
 }
 
 dependencies {
