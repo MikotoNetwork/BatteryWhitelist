@@ -18,6 +18,7 @@ android {
             storePassword System.getenv("KEYSTORE_PASSWORD")
             keyAlias System.getenv("KEY_ALIAS")
             keyPassword System.getenv("KEY_PASSWORD")
+            
         }
     }
 
@@ -25,8 +26,8 @@ android {
         applicationId "com.batterywhitelist"
         minSdk 29
         targetSdk 37
-        versionCode 15
-        versionName "1.15"
+        versionCode 17
+        versionName "1.17"
     }
 
     buildTypes {
@@ -36,6 +37,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
             signingConfig signingConfigs.release
+            enableV1Signing false
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing true
+        }
+        debug {
+        enableV1Signing false
+        enableV2Signing true
+        enableV3Signing true
+        enableV4Signing true
         }
     }
 
