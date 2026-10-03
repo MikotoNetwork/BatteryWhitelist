@@ -106,7 +106,7 @@ public class BatteryWhitelistModule extends XposedModule {
                     }
                     logWriter = new BufferedWriter(new FileWriter(LOG_PATH, true));
                 }
-                logWriter.write(System.currentTimeMillis());
+                logWriter.write(String.valueOf(System.currentTimeMillis()));
                 logWriter.write(" : ");
                 logWriter.write(msg);
                 logWriter.write('\n');
