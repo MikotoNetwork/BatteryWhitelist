@@ -1,7 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="red">#FF0000</color>
+    <color name="black">#FF000000</color>
+    <color name="red">#FFFF0000</color>
+    <color name="bg_page">#F5F6F8</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="text_primary">#1F2937</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_hint">#9CA3AF</color>
+    <color name="accent">#3B82F6</color>
+    <color name="check_border">#9AA0A6</color>
 </resources>

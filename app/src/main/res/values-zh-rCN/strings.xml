@@ -5,4 +5,6 @@
     <string name="EditText_hint">搜索应用名或包名...</string>
     <string name="title">勾选要保护的应用（防止被 ColorOS 冻结）</string>
     <string name="app_name">电池白名单守护者</string>
-    </resources>
+    <string name="subtitle">勾选的应用将被系统强制保留后台</string>
+    <string name="empty_hint">没有匹配的应用</string>
+</resources>

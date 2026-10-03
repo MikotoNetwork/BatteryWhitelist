@@ -77,4 +77,4 @@
 只要设备在我们手里，一切规则就应由我们自己书写。
 
 *(本项目基于 MIT 协议开源)*
-![BatteryWhitelist](assets/ic_launcher.png)
+![BatteryWhitelistplus](assets/ic_launcher.png)
