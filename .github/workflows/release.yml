@@ -1,0 +1,83 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 🌟 1. 解码 Keystore
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.jks
+
+      # 🌟 2. 编译并签名（严丝合缝对齐仓库里的 Secrets 名字）
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+        env:
+          # 左边是给 Gradle 读的变量名，右边是仓库里的真实名字
+          SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          # 路径直接把刚刚解码出来的文件所在位置传过去
+          SIGNING_KEYSTORE_PATH: ${{ github.workspace }}/app/release.jks
+
+      # 3. 提取版本信息
+      - name: Extract version info
+        id: version
+        run: |
+          VERSION_NAME=${GITHUB_REF#refs/tags/v}
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          VERSION_CODE=$(grep -oP 'versionCode\s+\K\d+' app/build.gradle)
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+
+      # 4. 把 APK 复制到 docs/download (享受 Cloudflare 加速)
+      - name: Copy APK to docs
+        run: |
+          mkdir -p docs/download
+          cp app/build/outputs/apk/release/app-release.apk docs/download/app-release.apk
+
+      # 5. 动态更新 version.json
+      - name: Update version.json
+        run: |
+          jq --arg vc "${{ steps.version.outputs.VERSION_CODE }}" \
+             --arg vn "${{ steps.version.outputs.VERSION_NAME }}" \
+             --arg date "$(date +'%Y-%m-%d')" \
+             '.versionCode = ($vc|tonumber) | .versionName = $vn | .downloadUrl = "https://batterywhitelist.fun/download/app-release.apk" | .releaseDate = $date' \
+             docs/version.json > docs/version.json.tmp && mv docs/version.json.tmp docs/version.json
+
+      # 6. 提交并推送回仓库（[skip ci] 防止死循环）
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/download/app-release.apk docs/version.json
+          git commit -m "Auto deploy release ${{ steps.version.outputs.VERSION_NAME }} [skip ci]"
+          git push origin HEAD:main
+
+      # 7. 创建 GitHub Release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: app/build/outputs/apk/release/app-release.apk
+          generate_release_notes: true

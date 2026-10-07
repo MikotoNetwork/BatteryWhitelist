@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:minHeight="68dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/appIcon"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="14dp"
+        android:contentDescription="@null"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/appName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="15sp"
+            android:textColor="@color/text_primary"/>
+
+        <TextView
+            android:id="@+id/appPkg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:maxLines="1"
+            android:ellipsize="middle"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"/>
+    </LinearLayout>
+
+    <!-- 勾选指示器：靠父布局的 activated 状态自动切换 -->
+    <ImageView
+        android:id="@+id/appCheck"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="12dp"
+        android:duplicateParentState="true"
+        android:src="@drawable/ic_check_selector"
+        android:contentDescription="@null"/>
+</LinearLayout>

@@ -1,0 +1,8 @@
+id=batterywhitelist
+name=BatteryWhitelist
+version=1.0
+versionCode=1
+author=MikotoNetwork
+description=阻止 ColorOS 恢复电池优化
+minApiVersion=102
+targetApiVersion=102
