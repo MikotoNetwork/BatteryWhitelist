@@ -2,7 +2,6 @@ plugins {
     id 'com.android.application'
 }
 
-// 🎯 强制排除 Kotlin 依赖，防止 AAR 把 2MB 的 Kotlin 垃圾带进来
 configurations.all {
     exclude group: 'org.jetbrains.kotlin'
     exclude group: 'org.jetbrains'
@@ -14,8 +13,7 @@ android {
 
     signingConfigs {
         release {
-            // 🌟 这里的名字必须和上方 YAML 里 env: 左边的名字一模一样！
-            // 优先从环境变量读取，读不到则回退到本地路径（方便本地开发）
+           
             storeFile file(System.getenv("SIGNING_KEYSTORE_PATH") ?: "release.jks")
             storePassword System.getenv("SIGNING_STORE_PASSWORD")
             keyAlias System.getenv("SIGNING_KEY_ALIAS")
@@ -27,8 +25,8 @@ android {
         applicationId "com.batterywhitelist"
         minSdk 29
         targetSdk 37
-        versionCode 47
-        versionName "1.4.7"
+        versionCode 48
+        versionName "1.4.8"
     }
 
     buildTypes {
@@ -41,7 +39,7 @@ android {
         }
     }   
 
-    // 🎯 关闭 Release 包的 Lint 致命检查，防止 CI 意外卡死
+    
     lint {
         checkReleaseBuilds false
         abortOnError false
@@ -59,7 +57,6 @@ android {
             'META-INF/*.version',
             'META-INF/androidx.*',
             'META-INF/com/**',
-            // 🌟 精准爆头，专门针对这个漏网之鱼
             'META-INF/com/android/build/gradle/app-metadata.properties',
             'META-INF/version-control-info.textproto',
             'META-INF/*.kotlin_module'
