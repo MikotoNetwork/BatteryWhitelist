@@ -31,18 +31,16 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release.jks
 
-      # 🌟 2. 编译并签名（严丝合缝对齐仓库里的 Secrets 名字）
+      # 🌟 2. 编译并签名
       - name: Build Release APK
         run: ./gradlew assembleRelease
         env:
-          # 左边是给 Gradle 读的变量名，右边是仓库里的真实名字
           SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          # 路径直接把刚刚解码出来的文件所在位置传过去
           SIGNING_KEYSTORE_PATH: ${{ github.workspace }}/app/release.jks
 
-      # 3. 提取版本信息
+      # 🌟 3. 提取版本信息
       - name: Extract version info
         id: version
         run: |
@@ -51,31 +49,78 @@ jobs:
           VERSION_CODE=$(grep -oP 'versionCode\s+\K\d+' app/build.gradle)
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
 
-      # 4. 把 APK 复制到 docs/download (享受 Cloudflare 加速)
+      # 🌟 4. 从 docs/version_log.txt 提取本次版本的更新日志
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION_NAME="${{ steps.version.outputs.VERSION_NAME }}"
+          LOG_FILE="docs/version_log.txt"
+
+          if [ ! -f "$LOG_FILE" ]; then
+            echo "::warning::$LOG_FILE 不存在，使用默认日志"
+            LOG_CONTENT="无更新日志"
+          else
+            # 提取 [v版本号] 段落，直到下一个 [v 开头的行或文件末尾
+            LOG_CONTENT=$(awk -v ver="$VERSION_NAME" '
+              /^\[v/ {
+                if ($0 == "[v" ver "]") in_section = 1
+                else in_section = 0
+                next
+              }
+              in_section { print }
+            ' "$LOG_FILE")
+
+            if [ -z "$LOG_CONTENT" ]; then
+              echo "::warning::$LOG_FILE 里没找到 [v$VERSION_NAME] 段落，使用默认日志"
+              LOG_CONTENT="无更新日志"
+            fi
+          fi
+
+          # 多行输出写进 GITHUB_OUTPUT
+          {
+            echo 'LOG_CONTENT<<EOF_CHANGELOG'
+            echo "$LOG_CONTENT"
+            echo 'EOF_CHANGELOG'
+          } >> $GITHUB_OUTPUT
+
+      # 🌟 5. 把 APK 复制到 docs/download
       - name: Copy APK to docs
         run: |
           mkdir -p docs/download
           cp app/build/outputs/apk/release/app-release.apk docs/download/app-release.apk
 
-      # 5. 动态更新 version.json
+      # 🌟 6. 动态更新 version.json（包含 updateLog）
       - name: Update version.json
+        env:
+          VERSION_CODE: ${{ steps.version.outputs.VERSION_CODE }}
+          VERSION_NAME: ${{ steps.version.outputs.VERSION_NAME }}
+          LOG_CONTENT: ${{ steps.changelog.outputs.LOG_CONTENT }}
         run: |
-          jq --arg vc "${{ steps.version.outputs.VERSION_CODE }}" \
-             --arg vn "${{ steps.version.outputs.VERSION_NAME }}" \
+          jq --arg vc "$VERSION_CODE" \
+             --arg vn "$VERSION_NAME" \
              --arg date "$(date +'%Y-%m-%d')" \
-             '.versionCode = ($vc|tonumber) | .versionName = $vn | .downloadUrl = "https://batterywhitelist.fun/download/app-release.apk" | .releaseDate = $date' \
+             --arg log "$LOG_CONTENT" \
+             '.versionCode = ($vc|tonumber)
+              | .versionName = $vn
+              | .downloadUrl = "https://batterywhitelist.fun/download/app-release.apk"
+              | .releaseDate = $date
+              | .updateLog = $log' \
              docs/version.json > docs/version.json.tmp && mv docs/version.json.tmp docs/version.json
 
-      # 6. 提交并推送回仓库（[skip ci] 防止死循环）
+          echo "---- 生成的 version.json ----"
+          cat docs/version.json
+
+      # 🌟 7. 提交并推送回仓库
       - name: Commit and Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add docs/download/app-release.apk docs/version.json
-          git commit -m "Auto deploy release ${{ steps.version.outputs.VERSION_NAME }} [skip ci]"
+          # 没有变更时 commit 会失败，用 || 忽略
+          git commit -m "Auto deploy release ${{ steps.version.outputs.VERSION_NAME }} [skip ci]" || echo "no changes"
           git push origin HEAD:main
 
-      # 7. 创建 GitHub Release
+      # 🌟 8. 创建 GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
