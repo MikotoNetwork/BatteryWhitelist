@@ -1,8 +1,8 @@
 {
-  "versionCode": 49,
-  "versionName": "1.4.9",
-  "updateLog": "焕新升级🆙！四位一体防护更强！欢迎更新！",
+  "versionCode": 51,
+  "versionName": "1.5.1",
+  "updateLog": "- 大重构！修复一些已知Bug",
   "downloadUrl": "https://batterywhitelist.fun/download/app-release.apk",
   "forceUpdate": false,
-  "releaseDate": "2026-10-10"
+  "releaseDate": "2026-10-11"
 }
