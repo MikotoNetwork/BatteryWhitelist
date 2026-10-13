@@ -1,0 +1,72 @@
+name: ✨ 功能建议
+description: 提出新功能、新 Hook 点、ColorOS 适配、UI 或脚本改进
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你为 BatteryWhitelist 提出建议。请先搜索现有 Issues，确认没有重复。
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 提交前检查
+      options:
+        - label: 我已搜索现有 Issues，确认没有重复
+          required: true
+        - label: 我已阅读 README，确认这不是已有功能
+          required: true
+        - label: 我愿意协助测试或提供日志
+          required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 功能领域
+      multiple: true
+      options:
+        - Xposed Hook / system_server 拦截
+        - ColorOS / OplusHansManager 适配
+        - OplusDeviceIdleHelper 动态代理
+        - Root 开机脚本 / service.d
+        - 内存守护线程
+        - App UI / 应用列表管理
+        - 更新分发 / version.json / Cover Install
+        - 文档 / README
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你的需求是否与某个痛点相关？
+      description: 描述你遇到的使用场景，例如厂商云控、重启后白名单被还原、手表断连等
+      placeholder: "例如：每次切换网络后，系统都会把小米运动健康改回优化并冻结。"
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望的解决方案
+      description: 你希望 BatteryWhitelist 如何解决这个问题
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 替代方案
+      description: 你考虑过哪些替代方案
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 补充信息
+      description: 可添加截图、反编译线索、类名、方法名、参考链接等
+    validations:
+      required: false

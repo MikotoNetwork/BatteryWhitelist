@@ -1,0 +1,110 @@
+name: 📱 兼容性报告
+description: 报告 BatteryWhitelist 在你的设备 / ROM 上是否正常工作
+title: "[Compatibility]: "
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        兼容性报告用于帮助作者收集不同设备、Android 版本、ColorOS 版本和 Root 方案下的表现。
+        请尽量填写完整，尤其是日志和 dumpsys 输出。
+
+  - type: input
+    id: module_version
+    attributes:
+      label: BatteryWhitelist 模块版本
+      placeholder: "例如 v1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: device_model
+    attributes:
+      label: 设备型号
+      placeholder: "例如 一加 13 / OPPO Find X8 / 小米 15"
+    validations:
+      required: true
+
+  - type: input
+    id: android_version
+    attributes:
+      label: Android 版本
+      placeholder: "例如 Android 16"
+    validations:
+      required: true
+
+  - type: input
+    id: rom_version
+    attributes:
+      label: ROM / ColorOS 版本
+      placeholder: "例如 ColorOS 16.0.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: root_solution
+    attributes:
+      label: Root 方案
+      options:
+        - KernelSU
+        - Magisk
+        - APatch
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: lsposed_version
+    attributes:
+      label: LSPosed 版本 / API
+      placeholder: "例如 LSPosed 1.9.2 (API 102)"
+    validations:
+      required: true
+
+  - type: input
+    id: target_apps
+    attributes:
+      label: 测试保护的应用
+      placeholder: "例如 小米运动健康 / com.xiaomi.wearable"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: result
+    attributes:
+      label: 测试结果
+      options:
+        - 完全正常
+        - 部分正常
+        - 完全不生效
+        - 导致系统异常 / 崩溃 / 卡开机
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: 详细表现
+      description: 重启后是否仍被冻结？白名单是否保留？守护线程是否启动？脚本是否生成？
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志与验证输出
+      render: shell
+      placeholder: |
+        cat /data/system/BatteryWhitelist.log
+        ls -l /data/adb/service.d/battery_guard.sh
+        dumpsys deviceidle whitelist
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: public_info
+    attributes:
+      label: 信息授权
+      options:
+        - label: 我确认以上信息可以公开用于兼容性统计
+          required: true

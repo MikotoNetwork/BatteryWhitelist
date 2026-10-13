@@ -1,0 +1,232 @@
+name: 🐛 Bug 报告
+description: 报告模块未生效、白名单被还原、系统异常、Root 脚本异常等问题
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你提交 Bug。BatteryWhitelist 涉及 system_server、LSPosed、Root 脚本和 ColorOS 私有 API，请务必提供完整环境与日志，否则很难定位。
+
+        提交前请确认：
+        - 已搜索现有 Issues，确认没有重复。
+        - 已阅读 README 的“安装与使用”和“验证成功”部分。
+        - 已授予 BatteryWhitelist Root 权限。
+        - 已在 LSPosed 中启用模块，并勾选“Android 系统 (android)”作用域。
+        - 已重启手机后复现。
+
+        常用日志命令：
+        - cat /data/system/BatteryWhitelist.log
+        - ls -l /data/adb/service.d/battery_guard.sh
+        - dumpsys deviceidle whitelist
+        - logcat -d | grep -Ei 'BatteryWhitelist|DeviceIdleController|OplusHansManager|OplusDeviceIdleHelper'
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 提交前检查
+      options:
+        - label: 我已搜索现有 Issues，确认没有重复
+          required: true
+        - label: 我已阅读 README 的安装步骤与验证成功部分
+          required: true
+        - label: 我已授予 BatteryWhitelist Root 权限
+          required: true
+        - label: 我已在 LSPosed 中启用模块并勾选“Android 系统 (android)”
+          required: true
+        - label: 我已重启手机后复现
+          required: true
+
+  - type: input
+    id: module_version
+    attributes:
+      label: BatteryWhitelist 模块版本
+      description: App 内显示版本，或 Release 中的 APK 版本
+      placeholder: "例如 v1.0.0 / app-release.apk"
+    validations:
+      required: true
+
+  - type: input
+    id: device_model
+    attributes:
+      label: 设备型号
+      placeholder: "例如 一加 13 / OPPO Find X8 / 小米 15"
+    validations:
+      required: true
+
+  - type: input
+    id: android_version
+    attributes:
+      label: Android 版本
+      placeholder: "例如 Android 16"
+    validations:
+      required: true
+
+  - type: input
+    id: rom_version
+    attributes:
+      label: ROM / ColorOS 版本
+      placeholder: "例如 ColorOS 16.0.1 / HyperOS 3 / 类原生"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: root_solution
+    attributes:
+      label: Root 方案
+      options:
+        - KernelSU
+        - Magisk
+        - APatch
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: root_version
+    attributes:
+      label: Root 管理器版本
+      placeholder: "例如 KernelSU v1.0.0 / Magisk 28.1"
+    validations:
+      required: false
+
+  - type: input
+    id: zygisk_next_version
+    attributes:
+      label: Zygisk Next 版本
+      placeholder: "例如 v1.2.3"
+    validations:
+      required: false
+
+  - type: input
+    id: lsposed_version
+    attributes:
+      label: LSPosed 版本 / API
+      description: README 要求 LSPosed API 102
+      placeholder: "例如 LSPosed 1.9.2 (API 102)"
+    validations:
+      required: true
+
+  - type: input
+    id: target_apps
+    attributes:
+      label: 受保护应用
+      description: 你勾选保护的应用名称和包名
+      placeholder: "例如 小米运动健康 / com.xiaomi.wearable"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: 问题类型
+      multiple: true
+      options:
+        - 白名单被系统还原 / 应用被冻结
+        - LSPosed Hook 未生效
+        - 内存守护线程未启动
+        - Root 开机脚本未生成 / 未执行
+        - App 无法授予 Root 或读取配置
+        - 系统崩溃 / 无限重启 / 卡开机
+        - 更新 / 签名 / Cover Install 问题
+        - 日志中出现异常堆栈
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 清晰描述你遇到的问题
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开 ...
+        2. 勾选 ...
+        3. 重启 ...
+        4. 看到 ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+      description: 你期望 BatteryWhitelist 如何工作
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么
+    validations:
+      required: true
+
+  - type: textarea
+    id: battery_whitelist_log
+    attributes:
+      label: BatteryWhitelist 日志
+      description: 请粘贴 /data/system/BatteryWhitelist.log 相关内容，注意删除敏感信息
+      render: shell
+      placeholder: |
+        cat /data/system/BatteryWhitelist.log
+    validations:
+      required: true
+
+  - type: textarea
+    id: root_script_check
+    attributes:
+      label: Root 脚本与权限检查
+      description: 请提供脚本是否存在、权限是否为 755、内容摘要
+      render: shell
+      placeholder: |
+        ls -l /data/adb/service.d/battery_guard.sh
+        cat /data/adb/service.d/battery_guard.sh
+    validations:
+      required: false
+
+  - type: textarea
+    id: dumpsys_check
+    attributes:
+      label: dumpsys deviceidle whitelist 输出
+      description: 查看受保护应用是否在 Doze 白名单中
+      render: shell
+      placeholder: |
+        dumpsys deviceidle whitelist
+    validations:
+      required: true
+
+  - type: textarea
+    id: logcat
+    attributes:
+      label: logcat 相关日志
+      description: 过滤 BatteryWhitelist、DeviceIdleController、OplusHansManager、OplusDeviceIdleHelper
+      render: shell
+      placeholder: |
+        logcat -d | grep -Ei 'BatteryWhitelist|DeviceIdleController|OplusHansManager|OplusDeviceIdleHelper'
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图 / 录屏
+      description: 可拖拽上传截图或录屏
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 补充信息
+      description: 是否刷过其他保活模块？是否修改过系统 XML？是否使用云控？其他可能有用的信息
+    validations:
+      required: false

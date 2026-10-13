@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 README / 安装教程
+    url: https://github.com/MikotoNetwork/BatteryWhitelist#readme
+    about: 请先阅读 README 的安装步骤、验证成功、免责声明和开发者手记。
+  - name: 🚀 Releases 下载
+    url: https://github.com/MikotoNetwork/BatteryWhitelist/releases
+    about: 下载最新 app-release.apk，查看版本更新与更新日志。
+  - name: 💬 Discussions 讨论区
+    url: https://github.com/MikotoNetwork/BatteryWhitelist/discussions
+    about: 使用问题、兼容性经验、搞机交流建议优先发到 Discussions。
+  - name: 🧩 LSPosed 官方仓库
+    url: https://github.com/LSPosed/LSPosed
+    about: LSPosed 框架本身的安装、激活、作用域问题请前往官方仓库。
+  - name: 🛡️ KernelSU 官方仓库
+    url: https://github.com/tiann/KernelSU
+    about: KernelSU Root 环境、模块刷入、超级用户授权问题请前往官方仓库。
