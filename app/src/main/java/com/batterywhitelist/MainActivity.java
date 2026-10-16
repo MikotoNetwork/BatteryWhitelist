@@ -75,6 +75,8 @@ public class MainActivity extends Activity {
     private static final String OFFICIAL_WEBSITE = "https://batterywhitelist.fun";
     private static final String SOURCE_CODE_URL = "https://github.com/MikotoNetwork/BatteryWhitelist";
     private static final String VERSION_JSON_URL = "https://batterywhitelist.fun/version.json";
+    // 新增：Telegram CI 频道链接
+    private static final String TELEGRAM_CHANNEL_URL = "https://t.me/BatteryWhitelist_CI";
 
     private static final long SU_TIMEOUT_SEC = 10L;
     private static final long SEARCH_DEBOUNCE_MS = 300L;
@@ -264,6 +266,8 @@ public class MainActivity extends Activity {
 
             popupMenu.getMenu().add(0, 5, 4, "导出配置");
             popupMenu.getMenu().add(0, 6, 5, "导入配置");
+            // 新增：Telegram CI 频道菜单项
+            popupMenu.getMenu().add(0, 7, 6, "CI 自动构建频道");
 
             popupMenu.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
@@ -273,6 +277,7 @@ public class MainActivity extends Activity {
                     case 4: toggleLauncherIcon(); return true;
                     case 5: exportConfig(); return true;
                     case 6: importConfig(); return true;
+                    case 7: openUrl(TELEGRAM_CHANNEL_URL); return true; // 新增跳转逻辑
                 }
                 return false;
             });

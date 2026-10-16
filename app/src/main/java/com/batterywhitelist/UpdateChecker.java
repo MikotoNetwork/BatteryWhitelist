@@ -35,7 +35,7 @@ import java.util.List;
  * 职责划分：
  *  - check()：联网获取 version.json 并判断是否需要更新，通过回调通知调用方
  *  - downloadAndInstall()：负责下载 + 校验 + 唤起系统安装器（不弹更新提示，由调用方决定）
- *
+ *  -另请参见GitHub Actions的wiki
  * @author MikotoNetwork
  * @version 1.40
  */
@@ -49,7 +49,7 @@ public class UpdateChecker {
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
     public UpdateChecker(Context context, String versionJsonUrl) {
-        // 用 application context 长期持有，避免泄漏 Activity
+        // 用 application context 长期持有，避免泄漏 Activity导致崩溃
         this.appContext = context.getApplicationContext();
         this.versionJsonUrl = versionJsonUrl;
     }
