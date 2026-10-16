@@ -21,7 +21,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      
       - name: Clean Gradle Cache
         run: rm -rf ~/.gradle/caches
 
@@ -40,3 +39,26 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 7
+
+      - name: Send APK to Telegram
+        if: success()
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          set -e
+          APK_PATH=$(ls app/build/outputs/apk/debug/*.apk | head -n 1)
+          APK_NAME=$(basename "$APK_PATH")
+
+          CAPTION=$(printf "🚀 *CI Build Success*\n\n*Repo:* %s\n*Branch:* %s\n*Commit:* \`%s\`\n*Author:* %s" \
+            "${{ github.repository }}" \
+            "${{ github.ref_name }}" \
+            "${{ github.sha }}" \
+            "${{ github.actor }}")
+
+          curl -sS -X POST \
+            "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
+            -F "chat_id=${CHAT_ID}" \
+            -F "document=@${APK_PATH};filename=${APK_NAME}" \
+            -F "parse_mode=Markdown" \
+            -F "caption=${CAPTION}"
